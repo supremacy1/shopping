@@ -32,6 +32,24 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
 
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animated {
+            animation-duration: 0.7s;
+            animation-fill-mode: both;
+            animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -43,6 +61,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             background-color: var(--background); 
             color: var(--text);
             min-height: 100vh;
+            scroll-behavior: smooth;
         }
 
         .navbar {
@@ -66,7 +85,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            text-decoration: none;
+            text-decoration: none; 
             background: linear-gradient(135deg, #A5B4FC, #818CF8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -108,12 +127,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .hero h1 {
-            font-size: 2.8rem;
+            font-size: 3.2rem;
             font-weight: 800;
             margin-bottom: 12px; 
-            background: linear-gradient(135deg, #1F2937, #4B5563);
+            background: linear-gradient(135deg, #111827, #4B5563);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1.2;
         }
 
         .hero p {
@@ -121,6 +141,112 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* New Slider Styles */
+        .slider-container {
+            max-width: 1200px;
+            margin: 40px auto 20px;
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 3;
+            width: 90%;
+            max-width: 700px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .slide-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+        }
+
+        .slide-content p {
+            font-size: 1rem;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            z-index: 4;
+            font-size: 1.5rem;
+            transition: background-color 0.2s;
+        }
+        .slider-nav:hover { background-color: rgba(0, 0, 0, 0.6); }
+        .slider-nav.prev { left: 10px; border-radius: 8px 0 0 8px; }
+        .slider-nav.next { right: 10px; border-radius: 0 8px 8px 0; }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 4;
+        }
+        .dot { width: 12px; height: 12px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; transition: background-color 0.2s; }
+        .dot.active { background-color: white; }
+
+        .btn-hero {
+            display: inline-block;
+            margin-top: 24px;
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .btn-hero:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
         }
 
         .container {
@@ -139,7 +265,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             background-color: var(--surface);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: var(--card-shadow); 
+            box-shadow: var(--card-shadow);
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.3s ease, border-color 0.3s ease;
             display: flex;
@@ -147,7 +273,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .product-card:hover {
-            transform: translateY(-5px); 
+            transform: translateY(-5px);
             border-color: var(--primary);
         }
 
@@ -238,7 +364,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             font-weight: 600;
             font-size: 0.9rem;
             transition: background 0.2s;
-        }
+        } 
 
         .btn-add:hover {
             background-color: var(--primary-hover);
@@ -323,6 +449,82 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             font-size: 0.9rem;
         }
 
+        /* New Section Styles */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--text);
+        }
+
+        .feature-section {
+            padding: 60px 0;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .feature-item h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-item p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .health-tips-section {
+            padding: 60px 0;
+        }
+
+        .health-tip-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        }
+
+        .health-tip-card h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .health-tip-card p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .health-tip-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+
     </style>
 </head>
 <body>
@@ -340,16 +542,35 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     </div>
 </nav>
 
-<div class="hero">
-    <h1>Explore our collection</h1>
-    <p>Handpicked, high-quality items designed to fit your standard lifestyle. Pay securely in seconds.</p>
+<div class="slider-container">
+    <div class="slides">
+        <div class="slide active">
+            <img src="https://placehold.co/1200x450/2c3e50/ffffff?text=Pure+Herbal+Extracts" alt="Banner 1">
+            <div class="slide-content animated" style="animation-name: fadeInUp;">
+                <h1>Discover Nature's Finest</h1>
+                <p>Premium, all-natural products carefully selected to bring health and wellness into your life.</p>
+                <a href="#products" class="btn-hero">Shop Now</a>
+            </div>
+        </div>
+        <div class="slide">
+            <img src="https://placehold.co/1200x450/16a085/ffffff?text=Organic+Wellness" alt="Banner 2">
+            <div class="slide-content">
+                <h1>Embrace Organic Living</h1>
+                <p>Experience the benefits of ethically sourced and sustainably harvested ingredients.</p>
+                <a href="#products" class="btn-hero">Explore Collection</a>
+            </div>
+        </div>
+    </div>
+    <button class="slider-nav prev">&lt;</button>
+    <button class="slider-nav next">&gt;</button>
+    <div class="slider-dots"></div>
 </div>
-
 <div class="container">
-    <div class="product-grid">
+    <div id="products" class="product-grid">
         <?php if ($result && $result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()): ?>
-                <div class="product-card">
+            <?php $animation_delay = 0; ?>
+            <?php while ($row = $result->fetch_assoc()): $animation_delay += 0.05; ?>
+                <div class="product-card animated" style="animation-name: fadeInUp; animation-delay: <?= $animation_delay ?>s;">
                     <a href="product.php?id=<?= $row['id'] ?>">
                         <div class="img-container">
                             <?php if (!empty($row['image']) && file_exists("uploads/" . $row['image'])): ?>
@@ -407,6 +628,40 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     </div>
 </div>
 
+<div class="feature-section">
+    <div class="container">
+        <h2 class="section-title animated" style="animation-name: fadeInUp;">Why Choose Us?</h2>
+        <div class="feature-grid">
+            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
+                <h3>🌿 100% Natural</h3>
+                <p>All our products are sourced from nature, free from artificial additives and harmful chemicals, ensuring you get only the best.</p>
+            </div>
+            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.2s;">
+                <h3>💖 Ethically Sourced</h3>
+                <p>We partner with local farmers and suppliers who share our commitment to sustainability, quality, and fair trade practices.</p>
+            </div>
+            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.3s;">
+                <h3>🚀 Fast Delivery</h3>
+                <p>Your wellness journey shouldn't have to wait. We offer fast, reliable, and secure shipping on all your orders.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="health-tips-section">
+    <div class="container">
+        <h2 class="section-title animated" style="animation-name: fadeInUp;">Health & Wellness Tip</h2>
+        <div class="health-tip-card animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
+            <div class="icon">💧</div>
+            <h4>The Power of Hydration</h4>
+            <p>
+                Drinking enough water daily is crucial for energy levels and brain function. Start your day with a glass of water to kickstart your metabolism and stay refreshed and focused throughout the day.
+            </p>
+        </div>
+    </div>
+</div>
+
+
 <footer class="site-footer">
     <div class="container">
         <p>&copy; <?= date('Y') ?> Nebula Shop. All Rights Reserved.</p>
@@ -414,6 +669,64 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-card').forEach(function(card) {
+        // ... existing product card script
+    });
+
+    // New Slider Script
+    const slides = document.querySelectorAll('.slide');
+    const nextBtn = document.querySelector('.slider-nav.next');
+    const prevBtn = document.querySelector('.slider-nav.prev');
+    const dotsContainer = document.querySelector('.slider-dots');
+    let currentSlide = 0;
+    let slideInterval;
+
+    function showSlide(n) {
+        slides.forEach(slide => slide.classList.remove('active'));
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach(dot => dot.classList.remove('active'));
+
+        currentSlide = (n + slides.length) % slides.length;
+
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    function startSlideShow() {
+        slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+    }
+
+    function stopSlideShow() {
+        clearInterval(slideInterval);
+    }
+
+    // Create dots
+    slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.addEventListener('click', () => {
+            stopSlideShow();
+            showSlide(i);
+            startSlideShow();
+        });
+        dotsContainer.appendChild(dot);
+    });
+
+    nextBtn.addEventListener('click', () => { stopSlideShow(); nextSlide(); startSlideShow(); });
+    prevBtn.addEventListener('click', () => { stopSlideShow(); prevSlide(); startSlideShow(); });
+
+    // Initialize
+    showSlide(0);
+    startSlideShow();
+
     document.querySelectorAll('.product-card').forEach(function(card) {
         const qtyInput = card.querySelector('.qty-input');
         const priceNairaDisplay = card.querySelector('.product-price');

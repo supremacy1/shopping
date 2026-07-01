@@ -22,8 +22,14 @@ $customer_email = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $customer_name = trim($_POST['name']);
     $customer_email = trim($_POST['email']);
+    $phone_number = trim($_POST['phone_number']);
+    $whatsapp_number = trim($_POST['whatsapp_number']); // Optional
+    $country = trim($_POST['country']);
+    $city = trim($_POST['city']);
+    $address = trim($_POST['address']);
 
-    if (!empty($customer_name) && !empty($customer_email)) {
+
+    if (!empty($customer_name) && !empty($customer_email) && !empty($phone_number) && !empty($country) && !empty($city) && !empty($address)) {
         // Generate unique reference
         $payment_reference = 'REF-' . strtoupper(bin2hex(random_bytes(6)));
 
@@ -36,7 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $order_id = $conn->insert_id;
             $stmt->close();
 
-            // 2. Insert order items
+            // 2. Insert into order_addresses table
+            $stmt = $conn->prepare("INSERT INTO order_addresses (order_id, phone_number, whatsapp_number, country, city, address) VALUES (?, ?, ?, ?, ?, ?)");
+            // Use null for whatsapp_number if it's empty
+            $whatsapp_val = !empty($whatsapp_number) ? $whatsapp_number : NULL;
+            $stmt->bind_param("isssss", $order_id, $phone_number, $whatsapp_val, $country, $city, $address);
+            $stmt->execute();
+            $stmt->close();
+
+            // 3. Insert order items
             $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
             foreach ($cart_items as $item) {
                 // Ensure product_id is an integer (handling static mockup product IDs as well)
@@ -55,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $error_message = "Order creation failed: " . $e->getMessage();
         }
     } else {
-        $error_message = "Please fill in all fields.";
+        $error_message = "Please fill in all required fields.";
     }
 }
 ?>
@@ -298,6 +312,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                             <label for="email">Email Address</label>
                             <input type="email" name="email" id="email" class="form-control" placeholder="e.g. john@example.com" required>
                         </div>
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <input type="tel" name="phone_number" id="phone_number" class="form-control" placeholder="e.g. +1 234 567 890" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp_number">WhatsApp Number (Optional)</label>
+                            <input type="tel" name="whatsapp_number" id="whatsapp_number" class="form-control" placeholder="e.g. +1 234 567 890">
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" name="country" id="country" class="form-control" placeholder="e.g. Nigeria" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" name="city" id="city" class="form-control" placeholder="e.g. Lagos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Street Address</label>
+                            <textarea name="address" id="address" class="form-control" rows="3" placeholder="e.g. 123 Main Street, Ikeja" required></textarea>
+                        </div>
                         <button type="submit" name="place_order" class="btn-pay">Proceed to Payment</button>
                     </form>
                 </div>
@@ -342,7 +376,7 @@ function payWithPaystack() {
     const statusMsg = document.getElementById('payment-status-message');
     
     let handler = PaystackPop.setup({
-        key: '<?= isset($_ENV['PAYSTACK_PUBLIC_KEY']) ? htmlspecialchars($_ENV['PAYSTACK_PUBLIC_KEY']) : "pk_test_demo_public_key_buy_shop" ?>',
+        key: '<?= isset($_ENV['PAYSTACK_PUBLIC_KEY']) ? htmlspecialchars($_ENV['PAYSTACK_PUBLIC_KEY']) : "pk_test_661851275218534634993802990483445652272" ?>',
         email: '<?= htmlspecialchars($customer_email) ?>',
         amount: <?= $total * 100 ?>,
         currency: "NGN",
