@@ -5,9 +5,10 @@ include "db.php";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $id = intval($_POST['id']);
     $qty = isset($_POST['quantity']) ? intval($_POST['quantity']) : (isset($_POST['qty']) ? intval($_POST['qty']) : 1);
+    $price = isset($_POST['price']) ? floatval($_POST['price']) : 0.0;
     if ($qty < 1) $qty = 1;
 
-    // Check database first to prevent tamper and fetch secure values
+    // Fetch product details like name and image from the database
     $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -15,13 +16,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     if ($product = $res->fetch_assoc()) {
         $name = $product['name'];
-        $price = $product['price'];
         $image = $product['image'];
     } else {
-        // Fallback for hardcoded sample products not yet in the DB
-        $name = isset($_POST['name']) ? $_POST['name'] : "Product " . $id;
-        $price = isset($_POST['price']) ? floatval($_POST['price']) : 0.0;
-        $image = "";
+        header("Location: index.php"); // Product not found
+        exit;
     }
     $stmt->close();
 

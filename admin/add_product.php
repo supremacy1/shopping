@@ -3,40 +3,164 @@ include "../db.php";
 
 if (isset($_POST['submit'])) {
 
-    $name = $_POST['name'];
-    $desc = $_POST['description'];
-    $price = $_POST['price'];
+    $name = trim($_POST['name']);
+    $desc = trim($_POST['description']);
+    $price_naira = $_POST['price_naira'];
+    $price_dollar = $_POST['price_dollar'];
+    $health_benefit = trim($_POST['health_benefit']);
+    $how_to_use = trim($_POST['how_to_use']);
 
-    // IMAGE UPLOAD
-    $image = $_FILES['image']['name'];
-    $tmp = $_FILES['image']['tmp_name'];
+    // Image Upload
+    $image = "";
 
-    $uploadDir = "../uploads/";
-    move_uploaded_file($tmp, $uploadDir . $image);
+    if (!empty($_FILES['image']['name'])) {
 
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, image)
-                            VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssds", $name, $desc, $price, $image);
-    $stmt->execute();
+        $image = time() . "_" . basename($_FILES['image']['name']);
+        $tmp = $_FILES['image']['tmp_name'];
 
-    echo "<div class='alert alert-success'>Product added successfully</div>";
+        $uploadDir = "../uploads/";
+
+        move_uploaded_file($tmp, $uploadDir . $image);
+    }
+
+    $stmt = $conn->prepare("
+        INSERT INTO products
+        (name, description, price_naira, price_dollar, image, health_benefit, how_to_use)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmt->bind_param(
+        "ssddsss",
+        $name,
+        $desc,
+        $price_naira,
+        $price_dollar,
+        $image,
+        $health_benefit,
+        $how_to_use
+    );
+
+    if($stmt->execute()){
+        echo "<div class='alert alert-success'>
+                Product added successfully.
+              </div>";
+    }else{
+        echo "<div class='alert alert-danger'>
+                ".$stmt->error."
+              </div>";
+    }
+
+    $stmt->close();
 }
 ?>
 
 <?php include "layout.php"; ?>
 
-<h3>Add Product</h3>
+<div class="card shadow">
 
-<form method="POST" enctype="multipart/form-data">
-    <input type="text" name="name" class="form-control mb-2" placeholder="Product Name">
+    <div class="card-header bg-primary text-white">
+        <h4>Add Product</h4>
+    </div>
 
-    <textarea name="description" class="form-control mb-2" placeholder="Description"></textarea>
+    <div class="card-body">
 
-    <input type="number" name="price" class="form-control mb-2" placeholder="Price">
+        <form method="POST" enctype="multipart/form-data">
 
-    <input type="file" name="image" class="form-control mb-3">
+            <div class="mb-3">
+                <label>Product Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    required>
+            </div>
 
-    <button name="submit" class="btn btn-primary">Add Product</button>
-</form>
+            <div class="mb-3">
+                <label>Description</label>
+                <textarea
+                    name="description"
+                    class="form-control"
+                    rows="4"
+                    required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label>Health Benefit</label>
+                <textarea
+                    name="health_benefit"
+                    class="form-control"
+                    rows="4"
+                    ></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label>How to Use</label>
+                <textarea
+                    name="how_to_use"
+                    class="form-control"
+                    rows="4"
+                    ></textarea>
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <label>Price (₦ Naira)</label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="price_naira"
+                        class="form-control"
+                        placeholder="Enter Naira Price"
+                        required>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label>Price ($ Dollar)</label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="price_dollar"
+                        class="form-control"
+                        placeholder="Enter Dollar Price"
+                        required>
+
+                </div>
+
+            </div>
+
+            <div class="mt-3">
+
+                <label>Product Image</label>
+
+                <input
+                    type="file"
+                    name="image"
+                    class="form-control"
+                    accept="image/*">
+
+            </div>
+
+            <br>
+
+            <button
+                type="submit"
+                name="submit"
+                class="btn btn-success">
+
+                Add Product
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
 
 <?php include "footer.php"; ?>

@@ -1,7 +1,6 @@
 <?php
 session_start();
 include "db.php";
-
 // Handle remove item
 if (isset($_GET['action']) && $_GET['action'] === 'remove' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
@@ -13,53 +12,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'remove' && isset($_GET['id'])
 }
 
 // Handle update quantity
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
     $id = intval($_POST['id']);
     $qty = intval($_POST['qty']);
-    if ($qty < 1) $qty = 1;
 
     if (isset($_SESSION['cart'][$id])) {
         $_SESSION['cart'][$id]['qty'] = $qty;
         $_SESSION['cart'][$id]['total'] = $_SESSION['cart'][$id]['qty'] * $_SESSION['cart'][$id]['price'];
     }
-    header("Location: cart.php");
-    exit;
-}
-
-// Handle adding to cart via POST (submitting from index.php directly)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
-    $id = intval($_POST['id']);
-    $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 1;
-    if ($qty < 1) $qty = 1;
-
-    // Secure database fetch
-    $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    
-    if ($product = $res->fetch_assoc()) {
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-        
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]['qty'] += $qty;
-            $_SESSION['cart'][$id]['total'] = $_SESSION['cart'][$id]['qty'] * $_SESSION['cart'][$id]['price'];
-        } else {
-            $_SESSION['cart'][$id] = [
-                "id" => $id,
-                "name" => $product['name'],
-                "price" => $product['price'],
-                "qty" => $qty,
-                "image" => $product['image'],
-                "total" => $product['price'] * $qty
-            ];
-        }
-    }
-    $stmt->close();
-    header("Location: cart.php");
-    exit;
 }
 
 $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
@@ -77,17 +37,17 @@ foreach ($cart_items as $item) {
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;
+            --primary: #4F46E5; /* Indigo */
             --primary-hover: #4338CA;
-            --background: #0B0F19;
-            --surface: #1E293B;
-            --surface-alt: #334155;
-            --text: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border: #475569;
-            --success: #10B981;
-            --danger: #EF4444;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --background: #F9FAFB; /* Light Gray */
+            --surface: #FFFFFF; /* White */
+            --surface-alt: #F3F4F6;
+            --text: #111827; /* Dark Gray/Black */
+            --text-muted: #6B7280; /* Medium Gray */
+            --border: #E5E7EB; /* Light Gray Border */
+            --success: #16A34A; /* Darker Green */
+            --danger: #DC2626;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -121,7 +81,7 @@ foreach ($cart_items as $item) {
         h1 {
             font-size: 2.2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #A5B4FC, #818CF8);
+            background: linear-gradient(135deg, #1F2937, #4B5563);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -160,7 +120,7 @@ foreach ($cart_items as $item) {
             border-radius: 16px;
             padding: 24px;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
         }
 
         .empty-cart {
@@ -197,7 +157,7 @@ foreach ($cart_items as $item) {
 
         .cart-table td {
             padding: 20px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
 
@@ -223,12 +183,6 @@ foreach ($cart_items as $item) {
             margin-bottom: 4px;
         }
 
-        .qty-form {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .qty-input {
             width: 60px;
             padding: 6px;
@@ -238,22 +192,6 @@ foreach ($cart_items as $item) {
             color: var(--text);
             font-size: 0.95rem;
             text-align: center;
-        }
-
-        .btn-update {
-            background-color: var(--surface-alt);
-            color: var(--text);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .btn-update:hover {
-            background-color: var(--border);
         }
 
         .btn-remove {
@@ -288,7 +226,7 @@ foreach ($cart_items as $item) {
             font-weight: 700;
             margin-top: 24px;
             padding-top: 16px;
-            border-top: 1px dashed var(--border);
+            border-top: 1px solid var(--border);
             color: var(--text);
         }
 
@@ -326,6 +264,21 @@ foreach ($cart_items as $item) {
             margin-left: 8px;
             vertical-align: middle;
         }
+
+        .site-footer {
+            margin-top: 60px;
+            padding: 30px 20px;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .site-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
 <body>
@@ -357,7 +310,7 @@ foreach ($cart_items as $item) {
                     </thead>
                     <tbody>
                         <?php foreach ($cart_items as $id => $item): ?>
-                        <tr>
+                        <tr class="cart-item-row" data-id="<?= $id ?>" data-price="<?= $item['price'] ?>">
                             <td>
                                 <div class="cart-product">
                                     <?php if (!empty($item['image']) && file_exists("uploads/" . $item['image'])): ?>
@@ -374,14 +327,9 @@ foreach ($cart_items as $item) {
                             </td>
                             <td>₦<?= number_format($item['price'], 2) ?></td>
                             <td>
-                                <form method="POST" action="cart.php" class="qty-form">
-                                    <input type="hidden" name="action" value="update">
-                                    <input type="hidden" name="id" value="<?= $id ?>">
-                                    <input type="number" name="qty" class="qty-input" value="<?= $item['qty'] ?>" min="1" required>
-                                    <button type="submit" class="btn-update">Update</button>
-                                </form>
+                                <input type="number" name="qty" class="qty-input" value="<?= $item['qty'] ?>" min="1" required>
                             </td>
-                            <td>₦<?= number_format($item['total'], 2) ?></td>
+                            <td class="item-total">₦<?= number_format($item['total'], 2) ?></td>
                             <td>
                                 <a href="cart.php?action=remove&id=<?= $id ?>" class="btn-remove">Remove</a>
                             </td>
@@ -394,16 +342,16 @@ foreach ($cart_items as $item) {
             <div class="cart-card">
                 <h2 class="summary-title">Order Summary</h2>
                 <div class="summary-row">
-                    <span style="color: var(--text-muted);">Subtotal</span>
-                    <span>₦<?= number_format($total, 2) ?></span>
+                    <span style="color: var(--text-muted);" id="summary-subtotal-label">Subtotal</span>
+                    <span id="summary-subtotal-value">₦<?= number_format($total, 2) ?></span>
                 </div>
                 <div class="summary-row">
                     <span style="color: var(--text-muted);">Shipping</span>
                     <span style="color: var(--success); font-weight: 500;">Free</span>
                 </div>
                 <div class="summary-row total">
-                    <span>Total</span>
-                    <span>₦<?= number_format($total, 2) ?></span>
+                    <span id="summary-total-label">Total</span>
+                    <span id="summary-total-value">₦<?= number_format($total, 2) ?></span>
                 </div>
 
                 <a href="checkout.php" class="btn-checkout">Proceed to Checkout</a>
@@ -411,6 +359,66 @@ foreach ($cart_items as $item) {
         </div>
     <?php endif; ?>
 </div>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; <?= date('Y') ?> Nebula Shop. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formatCurrency = (amount) => {
+        return '₦' + amount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
+
+    const updateCartTotals = () => {
+        let grandTotal = 0;
+        document.querySelectorAll('.cart-item-row').forEach(row => {
+            const unitPrice = parseFloat(row.dataset.price);
+            const qtyInput = row.querySelector('.qty-input');
+            const quantity = parseInt(qtyInput.value);
+            
+            const itemTotal = unitPrice * quantity;
+            grandTotal += itemTotal;
+
+            // Update individual item total display
+            row.querySelector('.item-total').textContent = formatCurrency(itemTotal);
+        });
+
+        // Update summary totals
+        document.getElementById('summary-subtotal-value').textContent = formatCurrency(grandTotal);
+        document.getElementById('summary-total-value').textContent = formatCurrency(grandTotal);
+    };
+
+    document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('input', function() {
+            let quantity = parseInt(this.value);
+            if (isNaN(quantity) || quantity < 1) {
+                this.value = 1;
+            }
+            updateCartTotals();
+
+            // AJAX call to update session
+            const row = this.closest('.cart-item-row');
+            const id = row.dataset.id;
+            
+            const formData = new FormData();
+            formData.append('update_cart', '1');
+            formData.append('id', id);
+            formData.append('qty', this.value);
+
+            fetch('cart.php', {
+                method: 'POST',
+                body: formData
+            }).catch(err => console.error('Failed to update cart session:', err));
+        });
+    });
+});
+</script>
 
 </body>
 </html>

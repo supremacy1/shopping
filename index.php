@@ -19,16 +19,17 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;
+            --primary: #4F46E5; /* Indigo */
             --primary-hover: #4338CA;
-            --background: #0B0F19;
-            --surface: #1E293B;
-            --surface-alt: #334155;
-            --text: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border: #475569;
-            --success: #10B981;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --background: #F9FAFB; /* Light Gray */
+            --surface: #FFFFFF; /* White */
+            --surface-alt: #F3F4F6;
+            --text: #111827; /* Dark Gray/Black */
+            --text-muted: #6B7280; /* Medium Gray */
+            --border: #E5E7EB; /* Light Gray Border */
+            --success: #16A34A; /* Darker Green */
+            --danger: #DC2626;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -39,13 +40,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--background);
+            background-color: var(--background); 
             color: var(--text);
             min-height: 100vh;
         }
 
         .navbar {
-            background-color: rgba(30, 41, 59, 0.7);
+            background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             padding: 16px 20px;
@@ -76,7 +77,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            color: var(--text);
+            color: var(--text-muted);
             font-weight: 500;
             padding: 8px 16px;
             border-radius: 8px;
@@ -85,7 +86,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             transition: all 0.2s;
         }
 
-        .cart-link:hover {
+        .cart-link:hover, .admin-link:hover {
             border-color: var(--text-muted);
             background-color: var(--surface-alt);
         }
@@ -109,8 +110,8 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         .hero h1 {
             font-size: 2.8rem;
             font-weight: 800;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #F8FAFC, #94A3B8);
+            margin-bottom: 12px; 
+            background: linear-gradient(135deg, #1F2937, #4B5563);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -138,7 +139,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             background-color: var(--surface);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
+            box-shadow: var(--card-shadow); 
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.3s ease, border-color 0.3s ease;
             display: flex;
@@ -146,7 +147,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px); 
             border-color: var(--primary);
         }
 
@@ -187,6 +188,12 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             color: var(--text);
         }
 
+        .product-card a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
         .product-desc {
             color: var(--text-muted);
             font-size: 0.9rem;
@@ -204,12 +211,6 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             padding-top: 16px;
         }
 
-        .product-price {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--success);
-        }
-
         .add-form {
             display: flex;
             align-items: center;
@@ -221,7 +222,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             padding: 8px;
             border-radius: 6px;
             border: 1px solid var(--border);
-            background-color: var(--background);
+            background-color: var(--surface-alt);
             color: var(--text);
             text-align: center;
             font-size: 0.9rem;
@@ -256,6 +257,72 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             color: var(--text-muted);
             margin-bottom: 16px;
         }
+
+        /* New styles for currency and price display */
+        .price-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .currency-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .currency-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 28px 6px 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .currency-select-wrapper::after {
+            content: '▼';
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .product-price-dollar {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .site-footer {
+            margin-top: 60px;
+            padding: 30px 20px;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .site-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
 <body>
@@ -266,6 +333,9 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <a href="cart.php" class="cart-link">
             <span>🛒 Cart</span>
             <span class="cart-count"><?= $cart_count ?></span>
+        </a>
+        <a href="admin/products.php" class="cart-link admin-link" style="margin-left: 10px;">
+            <span>Admin</span>
         </a>
     </div>
 </nav>
@@ -280,30 +350,51 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <?php if ($result && $result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="product-card">
-                    <div class="img-container">
-                        <?php if (!empty($row['image']) && file_exists("uploads/" . $row['image'])): ?>
-                            <img src="uploads/<?= htmlspecialchars($row['image']) ?>" class="product-img" alt="<?= htmlspecialchars($row['name']) ?>">
-                        <?php else: ?>
-                            <div class="product-placeholder">
-                                <?= strtoupper(substr($row['name'], 0, 2)) ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                    <a href="product.php?id=<?= $row['id'] ?>">
+                        <div class="img-container">
+                            <?php if (!empty($row['image']) && file_exists("uploads/" . $row['image'])): ?>
+                                <img src="uploads/<?= htmlspecialchars($row['image']) ?>" class="product-img" alt="<?= htmlspecialchars($row['name']) ?>">
+                            <?php else: ?>
+                                <div class="product-placeholder">
+                                    <?= strtoupper(substr($row['name'], 0, 2)) ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </a>
                     
                     <div class="card-content">
-                        <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
-                        <p class="product-desc"><?= htmlspecialchars($row['description']) ?></p>
+                        <a href="product.php?id=<?= $row['id'] ?>">
+                            <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
+                        </a>
+                        <p class="product-desc"><?= htmlspecialchars(mb_strimwidth($row['description'], 0, 100, "...")) ?></p>
                         
-                        <div class="price-row">
-                            <span class="product-price">₦<?= number_format($row['price'], 2) ?></span>
-                            
-                            <form method="POST" action="cart.php" class="add-form">
+                        <form method="POST" action="add_to_cart.php" class="add-form">
+                            <div class="price-selector">
+                                <h4 class="product-price" data-unit-price="<?= $row['price_naira']; ?>">₦<?= number_format($row['price_naira'], 2); ?></h4>
+                                <p class="product-price-dollar" data-unit-price="<?= $row['price_dollar']; ?>">$<?= number_format($row['price_dollar'], 2); ?></p>
+                            </div>
+
+                            <div class="price-row">
                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <input type="hidden" name="price" value="<?= $row['price'] ?>">
-                                <input type="number" name="qty" class="qty-input" value="1" min="1">
+                                <input type="hidden" name="price" value="<?= $row['price_naira'] ?>">
+                                <input type="number" name="qty" class="qty-input" value="1" min="1" step="1">
                                 <button type="submit" class="btn-add">Order</button>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
+
+    <!-- <form method="POST" action="cart.php" class="add-form">
+        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+        <input
+            type="number"
+            name="qty"
+            class="qty-input"
+            value="1"
+            min="1"
+        >
+
+        <button type="submit" class="btn-add">Order</button>
+    </form> -->
                     </div>
                 </div>
             <?php endwhile; ?>
@@ -316,5 +407,49 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     </div>
 </div>
 
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; <?= date('Y') ?> Nebula Shop. All Rights Reserved.</p>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-card').forEach(function(card) {
+        const qtyInput = card.querySelector('.qty-input');
+        const priceNairaDisplay = card.querySelector('.product-price');
+        const priceDollarDisplay = card.querySelector('.product-price-dollar');
+
+        // Get base unit prices from data attributes
+        const unitPriceNaira = parseFloat(priceNairaDisplay.dataset.unitPrice);
+        const unitPriceDollar = parseFloat(priceDollarDisplay.dataset.unitPrice);
+
+        // Function to format numbers as currency
+        const formatCurrency = (amount) => {
+            return amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        };
+
+        // Add event listener to the quantity input
+        qtyInput.addEventListener('input', function() {
+            let quantity = parseInt(this.value);
+
+            // Ensure quantity is a valid number, default to 1 if not
+            if (isNaN(quantity) || quantity < 1) {
+                quantity = 1;
+            }
+
+            // Calculate new total prices
+            const totalNaira = unitPriceNaira * quantity;
+            const totalDollar = unitPriceDollar * quantity;
+
+            // Update the displayed prices
+            priceNairaDisplay.innerHTML = `₦${formatCurrency(totalNaira)}`;
+            priceDollarDisplay.innerHTML = `$${formatCurrency(totalDollar)}`;
+        });
+    });
+});
+</script>
 </body>
 </html>

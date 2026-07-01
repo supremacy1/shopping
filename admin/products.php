@@ -11,8 +11,9 @@ $result = $conn->query("SELECT * FROM products");
     <thead class="table-dark">
         <tr>
             <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
+            <th style="width: 30%;">Name</th>
+            <th>Price (₦)</th>
+            <th>Price ($)</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -21,11 +22,15 @@ $result = $conn->query("SELECT * FROM products");
         <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
             <td>
-                <img src="../uploads/<?= $row['image'] ?>" width="60">
+                <?php if (!empty($row['image']) && file_exists("../uploads/" . $row['image'])): ?>
+                    <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" width="60" alt="<?= htmlspecialchars($row['name']) ?>">
+                <?php endif; ?>
             </td>
             <td><?= $row['name'] ?></td>
-            <td>₦<?= number_format($row['price']) ?></td>
+            <td>₦<?= number_format($row['price_naira'], 2) ?></td>
+            <td>$<?= number_format($row['price_dollar'], 2) ?></td>
             <td>
+                <a href="../product.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm" target="_blank">View</a>
                 <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-danger btn-sm">Delete</a>
             </td>
         </tr>
