@@ -1,7 +1,6 @@
 <?php
 session_start();
 include "db.php";
-
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $id = intval($_POST['id']);
     $qty = isset($_POST['quantity']) ? intval($_POST['quantity']) : (isset($_POST['qty']) ? intval($_POST['qty']) : 1);
@@ -17,6 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($product = $res->fetch_assoc()) {
         $name = $product['name'];
         $image = $product['image'];
+        $price_naira = $product['price_naira'];
+        $price_dollar = $product['price_dollar'];
     } else {
         header("Location: index.php"); // Product not found
         exit;
@@ -28,16 +29,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (isset($_SESSION['cart'][$id])) {
+        // Just increase the quantity
         $_SESSION['cart'][$id]['qty'] += $qty;
-        $_SESSION['cart'][$id]['total'] = $_SESSION['cart'][$id]['qty'] * $_SESSION['cart'][$id]['price'];
     } else {
+        // Add new item with all details
         $_SESSION['cart'][$id] = [
             "id" => $id,
             "name" => $name,
-            "price" => $price,
-            "qty" => $qty,
             "image" => $image,
-            "total" => $price * $qty
+            "qty" => $qty,
+            "price_naira" => $price_naira,
+            "price_dollar" => $price_dollar,
+            "price" => $price_naira // For backward compatibility on cart page
         ];
     }
 

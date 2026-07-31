@@ -18,14 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
 
     if (isset($_SESSION['cart'][$id])) {
         $_SESSION['cart'][$id]['qty'] = $qty;
-        $_SESSION['cart'][$id]['total'] = $_SESSION['cart'][$id]['qty'] * $_SESSION['cart'][$id]['price'];
+        // The 'total' key is no longer stored in the session, it's calculated on the fly.
     }
 }
 
 $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
-$total = 0;
+$total_naira = 0;
+$total_dollar = 0;
 foreach ($cart_items as $item) {
-    $total += $item['total'];
+    // Use price_naira if available, otherwise fall back to the old 'price' key.
+    $price_naira = isset($item['price_naira']) ? $item['price_naira'] : ($item['price'] ?? 0);
+    $price_dollar = isset($item['price_dollar']) ? $item['price_dollar'] : 0;
+
+    $total_naira += $price_naira * $item['qty'];
+    $total_dollar += $price_dollar * $item['qty'];
 }
 ?>
 <!DOCTYPE html>
@@ -122,6 +128,36 @@ foreach ($cart_items as $item) {
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border);
         }
+        
+        .cart-table-wrapper {
+            overflow-x: auto;
+            /* Add a subtle hint for scrolling on touch devices */
+            -webkit-overflow-scrolling: touch;
+            /* On some systems, this can make the scrollbar more visible */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--surface);
+        }
+
+        /* Custom Scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+        .cart-table-wrapper::-webkit-scrollbar {
+            height: 12px; /* Height of the horizontal scrollbar */
+        }
+
+        .cart-table-wrapper::-webkit-scrollbar-track {
+            background: var(--border); /* Use a slightly darker track color */
+            border-radius: 10px;
+        }
+
+        .cart-table-wrapper::-webkit-scrollbar-thumb {
+            background-color: var(--primary); /* The color of the scrollbar handle */
+            border-radius: 10px;
+            border: 2px solid var(--border); /* Creates padding around thumb */
+        }
+
+        .cart-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background-color: var(--primary-hover); /* Color on hover */
+        }
+
 
         .empty-cart {
             text-align: center;
@@ -181,6 +217,12 @@ foreach ($cart_items as $item) {
             font-size: 1.1rem;
             color: var(--text);
             margin-bottom: 4px;
+        }
+
+        .price-display-naira { font-weight: 500; }
+        .price-display-dollar {
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .qty-input {
@@ -297,7 +339,7 @@ foreach ($cart_items as $item) {
         </div>
     <?php else: ?>
         <div class="cart-grid">
-            <div class="cart-card" style="overflow-x: auto;">
+            <div class="cart-card cart-table-wrapper">
                 <table class="cart-table">
                     <thead>
                         <tr>
@@ -310,7 +352,7 @@ foreach ($cart_items as $item) {
                     </thead>
                     <tbody>
                         <?php foreach ($cart_items as $id => $item): ?>
-                        <tr class="cart-item-row" data-id="<?= $id ?>" data-price="<?= $item['price'] ?>">
+                        <tr class="cart-item-row" data-id="<?= $id ?>" data-price-naira="<?= isset($item['price_naira']) ? $item['price_naira'] : ($item['price'] ?? 0) ?>" data-price-dollar="<?= $item['price_dollar'] ?? 0 ?>">
                             <td>
                                 <div class="cart-product">
                                     <?php if (!empty($item['image']) && file_exists("uploads/" . $item['image'])): ?>
@@ -325,11 +367,22 @@ foreach ($cart_items as $item) {
                                     </div>
                                 </div>
                             </td>
-                            <td>₦<?= number_format($item['price'], 2) ?></td>
+                            <td>
+                                <div class="price-display-naira">₦<?= number_format(isset($item['price_naira']) ? $item['price_naira'] : ($item['price'] ?? 0), 2) ?></div>
+                                <div class="price-display-dollar">$<?= number_format($item['price_dollar'] ?? 0, 2) ?></div>
+                            </td>
                             <td>
                                 <input type="number" name="qty" class="qty-input" value="<?= $item['qty'] ?>" min="1" required>
                             </td>
-                            <td class="item-total">₦<?= number_format($item['total'], 2) ?></td>
+                            <td class="item-total">
+                                <div class="price-display-naira">
+                                    <?php
+                                        $item_price_naira = isset($item['price_naira']) ? $item['price_naira'] : ($item['price'] ?? 0);
+                                        echo '₦' . number_format($item_price_naira * $item['qty'], 2);
+                                    ?>
+                                </div>
+                                <div class="price-display-dollar">$<?= number_format(($item['price_dollar'] ?? 0) * $item['qty'], 2) ?></div>
+                            </td>
                             <td>
                                 <a href="cart.php?action=remove&id=<?= $id ?>" class="btn-remove">Remove</a>
                             </td>
@@ -343,7 +396,10 @@ foreach ($cart_items as $item) {
                 <h2 class="summary-title">Order Summary</h2>
                 <div class="summary-row">
                     <span style="color: var(--text-muted);" id="summary-subtotal-label">Subtotal</span>
-                    <span id="summary-subtotal-value">₦<?= number_format($total, 2) ?></span>
+                    <span id="summary-subtotal-value">
+                        <div class="price-display-naira">₦<?= number_format($total_naira, 2) ?></div>
+                        <div class="price-display-dollar">$<?= number_format($total_dollar, 2) ?></div>
+                    </span>
                 </div>
                 <div class="summary-row">
                     <span style="color: var(--text-muted);">Shipping</span>
@@ -351,7 +407,10 @@ foreach ($cart_items as $item) {
                 </div>
                 <div class="summary-row total">
                     <span id="summary-total-label">Total</span>
-                    <span id="summary-total-value">₦<?= number_format($total, 2) ?></span>
+                    <span id="summary-total-value">
+                        <div class="price-display-naira">₦<?= number_format($total_naira, 2) ?></div>
+                        <div class="price-display-dollar">$<?= number_format($total_dollar, 2) ?></div>
+                    </span>
                 </div>
 
                 <a href="checkout.php" class="btn-checkout">Proceed to Checkout</a>
@@ -360,38 +419,42 @@ foreach ($cart_items as $item) {
     <?php endif; ?>
 </div>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; <?= date('Y') ?> Nebula Shop. All Rights Reserved.</p>
-    </div>
-</footer>
-
-<script>
+<?php include 'footer.php'; ?><script>
 document.addEventListener('DOMContentLoaded', function() {
-    const formatCurrency = (amount) => {
-        return '₦' + amount.toLocaleString('en-US', {
+    const formatCurrency = (amount, currency) => {
+        const symbol = currency === 'USD' ? '$' : '₦';
+        return symbol + amount.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
     };
 
     const updateCartTotals = () => {
-        let grandTotal = 0;
+        let grandTotalNaira = 0;
+        let grandTotalDollar = 0;
+
         document.querySelectorAll('.cart-item-row').forEach(row => {
-            const unitPrice = parseFloat(row.dataset.price);
+            const unitPriceNaira = parseFloat(row.dataset.priceNaira);
+            const unitPriceDollar = parseFloat(row.dataset.priceDollar);
             const qtyInput = row.querySelector('.qty-input');
             const quantity = parseInt(qtyInput.value);
             
-            const itemTotal = unitPrice * quantity;
-            grandTotal += itemTotal;
+            const itemTotalNaira = unitPriceNaira * quantity;
+            const itemTotalDollar = unitPriceDollar * quantity;
+            grandTotalNaira += itemTotalNaira;
+            grandTotalDollar += itemTotalDollar;
 
             // Update individual item total display
-            row.querySelector('.item-total').textContent = formatCurrency(itemTotal);
+            const itemTotalElement = row.querySelector('.item-total');
+            itemTotalElement.querySelector('.price-display-naira').textContent = formatCurrency(itemTotalNaira, 'NGN');
+            itemTotalElement.querySelector('.price-display-dollar').textContent = formatCurrency(itemTotalDollar, 'USD');
         });
 
         // Update summary totals
-        document.getElementById('summary-subtotal-value').textContent = formatCurrency(grandTotal);
-        document.getElementById('summary-total-value').textContent = formatCurrency(grandTotal);
+        document.querySelector('#summary-subtotal-value .price-display-naira').textContent = formatCurrency(grandTotalNaira, 'NGN');
+        document.querySelector('#summary-subtotal-value .price-display-dollar').textContent = formatCurrency(grandTotalDollar, 'USD');
+        document.querySelector('#summary-total-value .price-display-naira').textContent = formatCurrency(grandTotalNaira, 'NGN');
+        document.querySelector('#summary-total-value .price-display-dollar').textContent = formatCurrency(grandTotalDollar, 'USD');
     };
 
     document.querySelectorAll('.qty-input').forEach(input => {

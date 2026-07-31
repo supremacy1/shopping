@@ -2,15 +2,24 @@
 session_start();
 include "db.php";
 
+// Include mailer files
+include "mail_config.php";
+include "email_templates.php";
 $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
 if (empty($cart_items)) {
     header("Location: index.php");
     exit;
 }
 
-$total = 0;
+$total_naira = 0;
+$total_dollar = 0;
 foreach ($cart_items as $item) {
-    $total += $item['total'];
+    // Recalculate totals based on stored prices to be safe
+    $item_price_naira = isset($item['price_naira']) ? $item['price_naira'] : $item['price']; // Fallback for older cart items
+    $item_price_dollar = isset($item['price_dollar']) ? $item['price_dollar'] : 0;
+
+    $total_naira += $item_price_naira * $item['qty'];
+    $total_dollar += $item_price_dollar * $item['qty'];
 }
 
 $order_created = false;
@@ -27,6 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     $country = trim($_POST['country']);
     $city = trim($_POST['city']);
     $address = trim($_POST['address']);
+    $currency = isset($_POST['currency']) && $_POST['currency'] === 'USD' ? 'USD' : 'NGN';
+    $currency_symbol = ($currency === 'USD') ? '$' : '₦';
+
+    // Determine the total amount based on the selected currency
+    $final_total = ($currency === 'USD') ? $total_dollar : $total_naira;
 
 
     if (!empty($customer_name) && !empty($customer_email) && !empty($phone_number) && !empty($country) && !empty($city) && !empty($address)) {
@@ -36,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         $conn->begin_transaction();
         try {
             // 1. Insert into orders table
-            $stmt = $conn->prepare("INSERT INTO orders (customer_name, email, total_amount, payment_status, payment_reference) VALUES (?, ?, ?, 'pending', ?)");
-            $stmt->bind_param("ssds", $customer_name, $customer_email, $total, $payment_reference);
+            $stmt = $conn->prepare("INSERT INTO orders (customer_name, email, total_amount, currency, payment_status, payment_reference) VALUES (?, ?, ?, ?, 'pending', ?)");
+            $stmt->bind_param("ssdss", $customer_name, $customer_email, $final_total, $currency, $payment_reference);
             $stmt->execute();
             $order_id = $conn->insert_id;
             $stmt->close();
@@ -64,6 +78,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
             $conn->commit();
             $order_created = true;
+
+            // Prepare data for email
+            $order_details_for_email = [
+                'customer_name' => $customer_name,
+                'email' => $customer_email,
+                'total_amount' => $final_total,
+                'currency' => $currency,
+                'payment_reference' => $payment_reference,
+                'payment_status' => 'pending'
+            ];
+            $address_details_for_email = [
+                'phone_number' => $phone_number,
+                'address' => $address,
+                'city' => $city,
+                'country' => $country
+            ];
+
+            // Send Customer Receipt Email
+            $customer_subject = "Your Desamall Order Confirmation (#" . $payment_reference . ")";
+            $customer_body = get_customer_receipt_html($order_details_for_email, $cart_items);
+            send_email($customer_email, $customer_subject, $customer_body);
+
+            // Send Admin Notification Email
+            $admin_email = $_ENV['ADMIN_EMAIL'] ?? 'admin@example.com';
+            if (!empty($admin_email)) {
+                $admin_subject = "New Order Received! (#" . $payment_reference . ")";
+                $admin_body = get_admin_notification_html($order_details_for_email, $cart_items, $address_details_for_email);
+                send_email($admin_email, $admin_subject, $admin_body);
+            }
         } catch (Exception $e) {
             $conn->rollback();
             $error_message = "Order creation failed: " . $e->getMessage();
@@ -93,6 +136,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             --success: #10B981;
             --danger: #EF4444;
             --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+        }
+        /* Add this to your existing CSS */
+        .currency-selector-checkout {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
         }
 
         * {
@@ -305,6 +354,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                     <h2 class="card-title">Customer Information</h2>
                     <form method="POST" action="checkout.php">
                         <div class="form-group">
+                            <label for="currency">Payment Currency</label>
+                            <select name="currency" id="currency" class="form-control currency-selector-checkout">
+                                <option value="NGN" data-total="<?= $total_naira ?>" data-symbol="₦">NGN - Nigerian Naira</option>
+                                <option value="USD" data-total="<?= $total_dollar ?>" data-symbol="$">USD - US Dollar</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="name">Full Name</label>
                             <input type="text" name="name" id="name" class="form-control" placeholder="e.g. John Doe" required>
                         </div>
@@ -345,7 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
                         <div class="spinner"></div>
                     </div>
 
-                    <button onclick="payWithPaystack()" id="pay-btn" class="btn-pay">Pay ₦<?= number_format($total, 2) ?> Now</button>
+                    <button onclick="payWithPaystack()" id="pay-btn" class="btn-pay">Pay <?= $currency_symbol ?><?= number_format($final_total, 2) ?> Now</button>
                 </div>
             <?php endif; ?>
         </div>
@@ -354,18 +410,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         <div class="card">
             <h2 class="card-title">Order Summary</h2>
             <?php foreach ($cart_items as $item): ?>
-                <div class="order-summary-item">
+                <?php
+                    $item_total_naira = (isset($item['price_naira']) ? $item['price_naira'] : ($item['price'] ?? 0)) * $item['qty'];
+                    $item_total_dollar = ($item['price_dollar'] ?? 0) * $item['qty'];
+                ?>
+                <div class="order-summary-item" data-price-naira="<?= $item_total_naira ?>" data-price-dollar="<?= $item_total_dollar ?>">
                     <span><?= htmlspecialchars($item['name']) ?> <span style="color: var(--text-muted);">x<?= $item['qty'] ?></span></span>
-                    <span>₦<?= number_format($item['total'], 2) ?></span>
+                    <span class="item-total-display">₦<?= number_format($item_total_naira, 2) ?></span>
                 </div>
             <?php endforeach; ?>
             <div class="total-row">
-                <span>Total Amount</span>
-                <span>₦<?= number_format($total, 2) ?></span>
+                <span id="total-label">Total Amount</span>
+                <span id="total-value" data-total-naira="<?= $total_naira ?>" data-total-dollar="<?= $total_dollar ?>">
+                    ₦<?= number_format($total_naira, 2) ?>
+                </span>
             </div>
         </div>
     </div>
 </div>
+
+<!-- This script is now outside the PHP if-condition, so it runs on the initial form page -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const currencySelect = document.getElementById('currency');
+    if (currencySelect) {
+        currencySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const selectedCurrency = this.value;
+            const symbol = selectedOption.dataset.symbol;
+            const totalValueEl = document.getElementById('total-value');
+            const total = (selectedCurrency === 'USD') ? totalValueEl.dataset.totalDollar : totalValueEl.dataset.totalNaira;
+
+            // Update total display in the summary
+            document.getElementById('total-value').innerText = `${symbol}${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Update individual item displays in the summary
+            document.querySelectorAll('.order-summary-item').forEach(item => {
+                const itemTotal = (this.value === 'USD') ? item.dataset.priceDollar : item.dataset.priceNaira;
+                item.querySelector('.item-total-display').innerText = `${symbol}${parseFloat(itemTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            });
+
+            // Update the main "Proceed to Payment" button text
+            const proceedBtn = document.querySelector('button[name="place_order"]');
+            if (proceedBtn) {
+                proceedBtn.innerText = `Proceed to Payment (${symbol}${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
+            }
+        });
+    }
+});
+</script>
 
 <?php if ($order_created): ?>
 <!-- Paystack Inline JS -->
@@ -378,8 +471,8 @@ function payWithPaystack() {
     let handler = PaystackPop.setup({
         key: '<?= isset($_ENV['PAYSTACK_PUBLIC_KEY']) ? htmlspecialchars($_ENV['PAYSTACK_PUBLIC_KEY']) : "pk_test_661851275218534634993802990483445652272" ?>',
         email: '<?= htmlspecialchars($customer_email) ?>',
-        amount: <?= $total * 100 ?>,
-        currency: "NGN",
+        amount: <?= ($final_total ?? 0) * 100 ?>,
+        currency: "<?= $currency ?? 'NGN' ?>",
         ref: '<?= htmlspecialchars($payment_reference) ?>',
         callback: function(response) {
             // Payment success! Disable button and show loader
@@ -420,6 +513,37 @@ function payWithPaystack() {
 }
 </script>
 <?php endif; ?>
+
+<?php
+// To make this work, we also need to update the add_to_cart logic to store both prices.
+// And we need to add a 'currency' column to the 'orders' table.
+
+/*
+-- Run this SQL to update your 'orders' table:
+ALTER TABLE `orders`
+ADD COLUMN `currency` VARCHAR(3) NOT NULL DEFAULT 'NGN' AFTER `total_amount`;
+
+-- And update your add_to_cart.php to store both prices in the session.
+-- In add_to_cart.php, change the session part to this:
+
+if (isset($_SESSION['cart'][$id])) {
+    $_SESSION['cart'][$id]['qty'] += $qty;
+} else {
+    $_SESSION['cart'][$id] = [
+        "id" => $id,
+        "name" => $product['name'],
+        "image" => $product['image'],
+        "qty" => $qty,
+        "price_naira" => $product['price_naira'],
+        "price_dollar" => $product['price_dollar'],
+        // The 'price' and 'total' keys are no longer the single source of truth
+        "price" => $product['price_naira'] // for backward compatibility in cart page
+    ];
+}
+*/
+?>
+
+<?php include 'footer.php'; ?>
 
 </body>
 </html>

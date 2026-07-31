@@ -12,6 +12,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,15 +20,22 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5; /* Indigo */
+            --primary: #4F46E5;
+            /* Indigo */
             --primary-hover: #4338CA;
-            --background: #F9FAFB; /* Light Gray */
-            --surface: #FFFFFF; /* White */
+            --background: #F9FAFB;
+            /* Light Gray */
+            --surface: #FFFFFF;
+            /* White */
             --surface-alt: #F3F4F6;
-            --text: #111827; /* Dark Gray/Black */
-            --text-muted: #6B7280; /* Medium Gray */
-            --border: #E5E7EB; /* Light Gray Border */
-            --success: #16A34A; /* Darker Green */
+            --text: #111827;
+            /* Dark Gray/Black */
+            --text-muted: #6B7280;
+            /* Medium Gray */
+            --border: #E5E7EB;
+            /* Light Gray Border */
+            --success: #16A34A;
+            /* Darker Green */
             --danger: #DC2626;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
@@ -38,6 +46,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -58,65 +67,173 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--background); 
+            background-color: var(--background);
             color: var(--text);
             min-height: 100vh;
             scroll-behavior: smooth;
         }
 
-        .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* ================= HEADER ================= */
+
+        .top-bar {
+            background: #271b11;
+            color: #fff;
+            font-size: 14px;
+            padding: 10px 25px;
         }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .top-container {
+            max-width: 1300px;
+            margin: auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-decoration: none; 
-            background: linear-gradient(135deg, #A5B4FC, #818CF8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .top-links {
+            display: flex;
+            gap: 20px;
         }
 
-        .cart-link {
+        .top-links a {
+            color: #fff;
+            text-decoration: none;
+            opacity: .85;
+        }
+
+        .top-links a:hover {
+            opacity: 1;
+        }
+
+        .navbar {
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 18px 20px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: #2563eb;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        /* SEARCH */
+
+        .search-box {
+            flex: 1;
+            display: flex;
+            height: 48px;
+        }
+
+        .category-box {
+            width: 180px;
+            border: 1px solid var(--border);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            padding: 0 15px;
+            background: #fff;
+            outline: none;
+        }
+
+        .search-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-left: none;
+            border-right: none;
+            padding: 0 18px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-btn {
+            width: 65px;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .search-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
             display: flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            transition: all 0.2s;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            border-radius: 10px;
+            transition: .25s;
         }
 
-        .cart-link:hover, .admin-link:hover {
-            border-color: var(--text-muted);
-            background-color: var(--surface-alt);
+        .nav-btn:hover {
+            background: #f8fafc;
         }
 
         .cart-count {
-            background-color: var(--primary);
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
+            background: #ef4444;
+            color: #fff;
             padding: 2px 8px;
-            border-radius: 12px;
+            border-radius: 50px;
+            font-size: 12px;
+        }
+
+        .rating {
+
+            color: #f59e0b;
+
+            font-size: 14px;
+
+            margin-bottom: 12px;
+
+        }
+
+        /* SECOND MENU */
+
+        .main-menu {
+            background: #2563eb;
+        }
+
+        .menu-container {
+            max-width: 1300px;
+            margin: auto;
+            display: flex;
+            gap: 35px;
+            padding: 14px 20px;
+        }
+
+        .menu-container a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .menu-container a:hover {
+            color: #dbeafe;
         }
 
         .hero {
@@ -129,7 +246,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         .hero h1 {
             font-size: 3.2rem;
             font-weight: 800;
-            margin-bottom: 12px; 
+            margin-bottom: 12px;
             background: linear-gradient(135deg, #111827, #4B5563);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -146,13 +263,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         /* New Slider Styles */
         .slider-container {
-            max-width: 1200px;
-            margin: 40px auto 20px;
+            max-width: 1300px;
+            margin: 25px auto;
             position: relative;
-            height: 380px;
+            height: 200px;
+            border-radius: 18px;
             overflow: hidden;
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .08);
         }
 
         .slide {
@@ -174,32 +291,52 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         .slide img {
             width: 100%;
             height: 100%;
+            display: block;
             object-fit: cover;
         }
 
         .slide-content {
+
             position: absolute;
+
+            left: 80px;
+
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            z-index: 3;
-            width: 90%;
-            max-width: 700px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 25px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
+
+            transform: translateY(-50%);
+
+            max-width: 520px;
+
+            padding: 40px;
+
+            background: rgba(0, 0, 0, .45);
+
+            backdrop-filter: blur(10px);
+
+            border-radius: 15px;
+
+            text-align: left;
+
         }
 
         .slide-content h1 {
-            font-size: 2.8rem;
-            margin-bottom: 12px;
+
+            font-size: 52px;
+
+            font-weight: 800;
+
+            margin-bottom: 20px;
+
         }
 
         .slide-content p {
-            font-size: 1rem;
+
+            font-size: 18px;
+
+            line-height: 1.8;
+
+            margin-bottom: 25px;
+
         }
 
         .slider-nav {
@@ -215,9 +352,20 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             font-size: 1.5rem;
             transition: background-color 0.2s;
         }
-        .slider-nav:hover { background-color: rgba(0, 0, 0, 0.6); }
-        .slider-nav.prev { left: 10px; border-radius: 8px 0 0 8px; }
-        .slider-nav.next { right: 10px; border-radius: 0 8px 8px 0; }
+
+        .slider-nav:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .slider-nav.prev {
+            left: 10px;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .slider-nav.next {
+            right: 10px;
+            border-radius: 0 8px 8px 0;
+        }
 
         .slider-dots {
             position: absolute;
@@ -228,8 +376,19 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             gap: 10px;
             z-index: 4;
         }
-        .dot { width: 12px; height: 12px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; transition: background-color 0.2s; }
-        .dot.active { background-color: white; }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .dot.active {
+            background-color: white;
+        }
 
         .btn-hero {
             display: inline-block;
@@ -257,40 +416,115 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
         }
 
         .product-card {
-            background-color: var(--surface);
+            background: #fff;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            border: 1px solid #e5e7eb;
+            transition: .3s;
             display: flex;
             flex-direction: column;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .12);
         }
 
         .img-container {
-            height: 200px;
-            background-color: var(--surface-alt);
-            position: relative;
-            overflow: hidden;
+
+            height: 260px;
+
+            background: #fff;
+
             display: flex;
-            align-items: center;
+
             justify-content: center;
+
+            align-items: center;
+
+            overflow: hidden;
+
+            position: relative;
+
         }
 
         .product-img {
+
             width: 100%;
+
             height: 100%;
-            object-fit: cover;
+
+            object-fit: contain;
+
+            transition: .4s;
+
+        }
+
+        .product-card:hover .product-img {
+
+            transform: scale(1.08);
+
+        }
+
+        .sale-badge {
+
+            position: absolute;
+
+            top: 12px;
+
+            left: 12px;
+
+            background: #ef4444;
+
+            color: #fff;
+
+            padding: 5px 10px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            border-radius: 20px;
+
+            z-index: 5;
+
+        }
+
+        .wishlist {
+
+            position: absolute;
+
+            top: 12px;
+
+            right: 12px;
+
+            width: 38px;
+
+            height: 38px;
+
+            background: #fff;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .1);
+
+            font-size: 18px;
+
+            cursor: pointer;
+
         }
 
         .product-placeholder {
@@ -301,17 +535,31 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .card-content {
-            padding: 20px;
+
+            padding: 18px;
+
             display: flex;
+
             flex-direction: column;
-            flex-grow: 1;
+
+            flex: 1;
+
         }
 
         .product-name {
-            font-size: 1.25rem;
-            font-weight: 600;
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            line-height: 1.5;
+
             margin-bottom: 8px;
-            color: var(--text);
+
+            height: 55px;
+
+            overflow: hidden;
+
         }
 
         .product-card a {
@@ -321,20 +569,31 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .product-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 16px;
-            flex-grow: 1;
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+
+            margin-bottom: 15px;
+
+            height: 45px;
+
+            overflow: hidden;
+
         }
 
         .price-row {
+
             display: flex;
-            justify-content: space-between;
+
             align-items: center;
+
+            gap: 10px;
+
             margin-top: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 16px;
+
         }
 
         .add-form {
@@ -343,28 +602,49 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             gap: 8px;
         }
 
+        .price-row { margin-top: auto; }
+
         .qty-input {
-            width: 50px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background-color: var(--surface-alt);
-            color: var(--text);
+
+            width: 65px;
+
+            height: 42px;
+
             text-align: center;
-            font-size: 0.9rem;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
         }
 
         .btn-add {
-            background-color: var(--primary);
-            color: white;
+
+            flex: 1;
+
+            height: 42px;
+
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: #fff;
+
+            font-weight: 700;
+
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        } 
+
+            transition: .3s;
+
+        }
+
+        .btn-add:hover {
+
+            background: #1d4ed8;
+
+        }
 
         .btn-add:hover {
             background-color: var(--primary-hover);
@@ -424,15 +704,25 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         .product-price {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--success);
+
+            font-size: 26px;
+
+            font-weight: 800;
+
+            color: #16a34a;
+
+            margin-bottom: 3px;
+
         }
-        
+
         .product-price-dollar {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-muted);
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+            margin-bottom: 15px;
+
         }
 
         .site-footer {
@@ -519,91 +809,567 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
+        /*================ SERVICES ================*/
 
+        .services {
+
+            padding: 70px 0;
+
+            background: #fff;
+
+        }
+
+        .services-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 25px;
+
+        }
+
+        .service-card {
+
+            background: #f8fafc;
+
+            padding: 35px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            transition: .3s;
+
+        }
+
+        .service-card:hover {
+
+            transform: translateY(-6px);
+
+            box-shadow: 0 15px 30px rgba(0, 0, 0, .08);
+
+        }
+
+        .service-icon {
+
+            font-size: 45px;
+
+            margin-bottom: 15px;
+
+        }
+
+        /*================ PROMO ================*/
+
+        .promo-banner {
+
+            margin: 70px 0;
+
+        }
+
+        .promo-content {
+
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+
+            padding: 70px;
+
+            border-radius: 20px;
+
+            color: #fff;
+
+            text-align: center;
+
+        }
+
+        .promo-content h2 {
+
+            font-size: 42px;
+
+            margin-bottom: 15px;
+
+        }
+
+        .promo-content p {
+
+            font-size: 20px;
+
+            margin-bottom: 25px;
+
+        }
+
+        .promo-btn {
+
+            display: inline-block;
+
+            padding: 15px 35px;
+
+            background: #fff;
+
+            color: #2563eb;
+
+            font-weight: bold;
+
+            border-radius: 10px;
+
+            text-decoration: none;
+
+        }
+
+        /*================ BRANDS ================*/
+
+        .brands {
+
+            padding: 70px 0;
+
+        }
+
+        .brand-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(6, 1fr);
+
+            gap: 20px;
+
+        }
+
+        .brand-card {
+
+            background: #fff;
+
+            border: 1px solid #e5e7eb;
+
+            padding: 30px;
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+            text-align: center;
+
+            border-radius: 12px;
+
+            transition: .3s;
+
+        }
+
+        .brand-card:hover {
+
+            border-color: #2563eb;
+
+        }
+
+        /*================ NEWSLETTER ================*/
+
+        .newsletter {
+
+            padding: 80px 0;
+
+            background: #111827;
+
+            color: #fff;
+
+            text-align: center;
+
+        }
+
+        .newsletter h2 {
+
+            font-size: 36px;
+
+            margin-bottom: 15px;
+
+        }
+
+        .newsletter p {
+
+            margin-bottom: 30px;
+
+        }
+
+        .newsletter-box {
+
+            display: flex;
+
+            max-width: 700px;
+
+            margin: auto;
+
+        }
+
+        .newsletter input {
+
+            flex: 1;
+
+            height: 55px;
+
+            padding: 0 20px;
+
+            border: none;
+
+            outline: none;
+
+            border-radius: 8px 0 0 8px;
+
+        }
+
+        .newsletter button {
+
+            width: 170px;
+
+            background: #2563eb;
+
+            border: none;
+
+            color: #fff;
+
+            font-weight: bold;
+
+            border-radius: 0 8px 8px 0;
+
+            cursor: pointer;
+
+        }
+
+        /*================ FOOTER ================*/
+
+        .footer {
+
+            background: #0f172a;
+
+            color: #cbd5e1;
+
+            padding: 70px 0 30px;
+
+        }
+
+        .footer-grid {
+
+            display: grid;
+
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+
+            gap: 40px;
+
+            margin-bottom: 40px;
+
+        }
+
+        .footer h3,
+
+        .footer h4 {
+
+            color: #fff;
+
+            margin-bottom: 20px;
+
+        }
+
+        .footer a {
+
+            display: block;
+
+            color: #cbd5e1;
+
+            text-decoration: none;
+
+            margin-bottom: 10px;
+
+        }
+
+        .footer a:hover {
+
+            color: #fff;
+
+        }
+
+        .footer hr {
+
+            border: none;
+
+            height: 1px;
+
+            background: #334155;
+
+            margin: 30px 0;
+
+        }
+
+        .copyright {
+
+            text-align: center;
+
+        }
+
+        /*================ MOBILE ================*/
+
+        @media(max-width:768px) {
+
+            .brand-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            .footer-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .newsletter-box {
+
+                flex-direction: column;
+
+                gap: 15px;
+
+            }
+
+            .newsletter input,
+
+            .newsletter button {
+
+                width: 100%;
+
+                border-radius: 8px;
+
+            }
+
+            .promo-content {
+
+                padding: 40px 25px;
+
+            }
+
+            .promo-content h2 {
+
+                font-size: 28px;
+
+            }
+
+        }
     </style>
 </head>
+
 <body>
 
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="index.php" class="logo">Nebula Shop</a>
-        <a href="cart.php" class="cart-link">
-            <span>🛒 Cart</span>
-            <span class="cart-count"><?= $cart_count ?></span>
-        </a>
-        <a href="admin/products.php" class="cart-link admin-link" style="margin-left: 10px;">
-            <span>Admin</span>
-        </a>
-    </div>
-</nav>
+    <!-- TOP BAR -->
 
-<div class="slider-container">
-    <div class="slides">
-        <div class="slide active">
-            <img src="https://placehold.co/1200x450/2c3e50/ffffff?text=Pure+Herbal+Extracts" alt="Banner 1">
-            <div class="slide-content animated" style="animation-name: fadeInUp;">
-                <h1>Discover Nature's Finest</h1>
-                <p>Premium, all-natural products carefully selected to bring health and wellness into your life.</p>
-                <a href="#products" class="btn-hero">Shop Now</a>
+    <div class="top-bar">
+
+        <div class="top-container">
+
+            <span>🚚 Free Delivery on Orders Above ₦20,000</span>
+
+            <div class="top-links">
+                <!-- <a href="#">Track Order</a>
+                <a href="#">Help</a> -->
+                <a href="contact.php">Contact</a>
             </div>
+
         </div>
-        <div class="slide">
-            <img src="https://placehold.co/1200x450/16a085/ffffff?text=Organic+Wellness" alt="Banner 2">
-            <div class="slide-content">
-                <h1>Embrace Organic Living</h1>
-                <p>Experience the benefits of ethically sourced and sustainably harvested ingredients.</p>
-                <a href="#products" class="btn-hero">Explore Collection</a>
-            </div>
-        </div>
+
     </div>
-    <button class="slider-nav prev">&lt;</button>
-    <button class="slider-nav next">&gt;</button>
-    <div class="slider-dots"></div>
-</div>
-<div class="container">
-    <div id="products" class="product-grid">
-        <?php if ($result && $result->num_rows > 0): ?>
-            <?php $animation_delay = 0; ?>
-            <?php while ($row = $result->fetch_assoc()): $animation_delay += 0.05; ?>
-                <div class="product-card animated" style="animation-name: fadeInUp; animation-delay: <?= $animation_delay ?>s;">
-                    <a href="product.php?id=<?= $row['id'] ?>">
-                        <div class="img-container">
-                            <?php if (!empty($row['image']) && file_exists("uploads/" . $row['image'])): ?>
-                                <img src="uploads/<?= htmlspecialchars($row['image']) ?>" class="product-img" alt="<?= htmlspecialchars($row['name']) ?>">
-                            <?php else: ?>
-                                <div class="product-placeholder">
-                                    <?= strtoupper(substr($row['name'], 0, 2)) ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </a>
-                    
-                    <div class="card-content">
+
+
+    <!-- HEADER -->
+
+    <nav class="navbar">
+
+        <div class="nav-container">
+
+            <a href="index.php" class="logo">
+                Desamall
+            </a>
+
+            <!-- <div class="search-box">
+
+                <select class="category-box">
+
+                    <option>All Categories</option>
+
+                    <option>Electronics</option>
+
+                    <option>Fashion</option>
+
+                    <option>Phones</option>
+
+                    <option>Laptops</option>
+
+                    <option>Home & Living</option>
+
+                    <option>Beauty</option>
+
+                    <option>Gaming</option>
+
+                </select>
+
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search for products...">
+
+                <button class="search-btn">
+
+                    🔍
+
+                </button>
+
+            </div> -->
+
+            <div class="nav-icons">
+
+                <!-- <a href="#" class="nav-btn">
+
+                    👤
+
+                    Account
+
+                </a> -->
+
+                <a href="cart.php" class="nav-btn">
+
+                    🛒 Cart
+
+                    <span class="cart-count">
+
+                        <?= $cart_count ?>
+
+                    </span>
+
+                </a>
+
+                <!-- <a href="admin/products.php" class="nav-btn">
+
+                    ⚙️ Admin
+
+                </a> -->
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <!-- MENU -->
+
+    <!-- <div class="main-menu">
+
+        <div class="menu-container">
+
+            <a href="#">Home</a>
+
+            <a href="#">Categories</a>
+
+            <a href="#">New Arrivals</a>
+
+            <a href="#">Best Sellers</a>
+
+            <a href="#">Flash Sale</a>
+
+            <a href="#">Brands</a>
+
+            <a href="#">Contact</a>
+
+        </div> -->
+
+    </div>
+
+    <div class="slider-container">
+        <div class="slides">
+                <div class="slide active">
+                    <img src="image/slide112.jfif" alt="Banner 1">
+                </div>
+                <div class="slide">
+                    <img src="image/slider23.jfif" alt="Banner 2">
+                </div>
+        </div>
+        <button class="slider-nav prev">&lt;</button>
+        <button class="slider-nav next">&gt;</button>
+        <div class="slider-dots"></div>
+    </div>
+    
+    <div class="container">
+        <div id="products" class="product-grid">
+            <?php if ($result && $result->num_rows > 0): ?>
+                <?php $animation_delay = 0; ?>
+                <?php while ($row = $result->fetch_assoc()): $animation_delay += 0.05; ?>
+                    <div class="product-card animated" style="animation-name: fadeInUp; animation-delay: <?= $animation_delay ?>s;">
                         <a href="product.php?id=<?= $row['id'] ?>">
-                            <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
+                            <div class="sale-badge">
+
+                                SALE
+
+                            </div>
+
+                            <div class="wishlist">
+
+                                ♡
+
+                            </div>
+                            <div class="img-container">
+                                <?php if (!empty($row['image']) && file_exists("uploads/" . $row['image'])): ?>
+                                    <img src="uploads/<?= htmlspecialchars($row['image']) ?>" class="product-img" alt="<?= htmlspecialchars($row['name']) ?>">
+                                <?php else: ?>
+                                    <div class="product-placeholder">
+                                        <?= strtoupper(substr($row['name'], 0, 2)) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </a>
-                        <p class="product-desc"><?= htmlspecialchars(mb_strimwidth($row['description'], 0, 100, "...")) ?></p>
-                        
-                        <form method="POST" action="add_to_cart.php" class="add-form">
-                            <div class="price-selector">
-                                <h4 class="product-price" data-unit-price="<?= $row['price_naira']; ?>">₦<?= number_format($row['price_naira'], 2); ?></h4>
-                                <p class="product-price-dollar" data-unit-price="<?= $row['price_dollar']; ?>">$<?= number_format($row['price_dollar'], 2); ?></p>
-                            </div>
 
+                        <div class="card-content">
+                            <a href="product.php?id=<?= $row['id'] ?>">
+                                <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
+                            </a>
+                            <div class="rating">
+
+                                ★★★★★
+                                <span style="color:#6b7280;">
+                                    (4.8)
+                                </span>
+
+                            </div>
+                            <p class="product-desc"><?= htmlspecialchars(mb_strimwidth($row['description'], 0, 100, "...")) ?></p>
+
+                            <form method="POST" action="add_to_cart.php" class="add-form">
+                                <div class="price-selector">
                             <div class="price-row">
-                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <input type="hidden" name="price" value="<?= $row['price_naira'] ?>">
-                                <input type="number" name="qty" class="qty-input" value="1" min="1" step="1">
-                                <button type="submit" class="btn-add">Order</button>
-                            </div>
-                        </form>
+                                <form method="POST" action="add_to_cart.php" class="add-form">
+                                    <h4 class="product-price" data-unit-price="<?= $row['price_naira']; ?>">₦<?= number_format($row['price_naira'], 2); ?></h4>
+                                    <p class="product-price-dollar" data-unit-price="<?= $row['price_dollar']; ?>">$<?= number_format($row['price_dollar'], 2); ?></p>
+                                </div>
 
-    <!-- <form method="POST" action="cart.php" class="add-form">
+                                <div class="price-row">
+                                    <!-- The dollar price can be a tooltip or shown on the product page to simplify the card -->
+                                    <!-- <p class="product-price-dollar" data-unit-price="<?= $row['price_dollar']; ?>">$<?= number_format($row['price_dollar'], 2); ?></p> -->
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <input type="hidden" name="price" value="<?= $row['price_naira'] ?>">
+                                    <input type="number" name="qty" class="qty-input" value="1" min="1" step="1">
+                                    <button type="submit" class="btn-add">
+
+                                        🛒 Add to Cart
+
+                                    </button>
+                                </div>
+                            </form>
+                                </form>
+                            </div>
+
+                            <!-- <form method="POST" action="cart.php" class="add-form">
         <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
         <input
@@ -616,153 +1382,158 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         <button type="submit" class="btn-add">Order</button>
     </form> -->
+                        </div>
                     </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="empty-products">
+                    <p>No products are currently available in the shop database.</p>
+                    <a href="admin/add_product.php" class="btn-add" style="display: inline-block; text-decoration: none;">Add Your First Product</a>
                 </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="empty-products">
-                <p>No products are currently available in the shop database.</p>
-                <a href="admin/add_product.php" class="btn-add" style="display: inline-block; text-decoration: none;">Add Your First Product</a>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
-</div>
 
-<div class="feature-section">
-    <div class="container">
-        <h2 class="section-title animated" style="animation-name: fadeInUp;">Why Choose Us?</h2>
-        <div class="feature-grid">
-            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
-                <h3>🌿 100% Natural</h3>
-                <p>All our products are sourced from nature, free from artificial additives and harmful chemicals, ensuring you get only the best.</p>
-            </div>
-            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.2s;">
-                <h3>💖 Ethically Sourced</h3>
-                <p>We partner with local farmers and suppliers who share our commitment to sustainability, quality, and fair trade practices.</p>
-            </div>
-            <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.3s;">
-                <h3>🚀 Fast Delivery</h3>
-                <p>Your wellness journey shouldn't have to wait. We offer fast, reliable, and secure shipping on all your orders.</p>
+    <div class="feature-section">
+        <div class="container">
+            <h2 class="section-title animated" style="animation-name: fadeInUp;">Why Choose Us?</h2>
+            <div class="feature-grid">
+                <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
+                    <h3>🌿 100% Natural</h3>
+                    <p>All our products are sourced from nature, free from artificial additives and harmful chemicals, ensuring you get only the best.</p>
+                </div>
+                <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.2s;">
+                    <h3>💖 Ethically Sourced</h3>
+                    <p>We partner with local farmers and suppliers who share our commitment to sustainability, quality, and fair trade practices.</p>
+                </div>
+                <div class="feature-item animated" style="animation-name: fadeInUp; animation-delay: 0.3s;">
+                    <h3>🚀 Fast Delivery</h3>
+                    <p>Your wellness journey shouldn't have to wait. We offer fast, reliable, and secure shipping on all your orders.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="health-tips-section">
-    <div class="container">
-        <h2 class="section-title animated" style="animation-name: fadeInUp;">Health & Wellness Tip</h2>
-        <div class="health-tip-card animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
-            <div class="icon">💧</div>
-            <h4>The Power of Hydration</h4>
-            <p>
-                Drinking enough water daily is crucial for energy levels and brain function. Start your day with a glass of water to kickstart your metabolism and stay refreshed and focused throughout the day.
-            </p>
+    <div class="health-tips-section">
+        <div class="container">
+            <h2 class="section-title animated" style="animation-name: fadeInUp;">Health & Wellness Tip</h2>
+            <div class="health-tip-card animated" style="animation-name: fadeInUp; animation-delay: 0.1s;">
+                <div class="icon">💧</div>
+                <h4>The Power of Hydration</h4>
+                <p>
+                    Drinking enough water daily is crucial for energy levels and brain function. Start your day with a glass of water to kickstart your metabolism and stay refreshed and focused throughout the day.
+                </p>
+            </div>
         </div>
     </div>
-</div>
 
+    <?php include 'footer.php'; ?>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; <?= date('Y') ?> Nebula Shop. All Rights Reserved.</p>
-    </div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.product-card').forEach(function(card) {
-        // ... existing product card script
-    });
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.product-card').forEach(function(card) {
+                    // ... existing product card script
+                });
 
-    // New Slider Script
-    const slides = document.querySelectorAll('.slide');
-    const nextBtn = document.querySelector('.slider-nav.next');
-    const prevBtn = document.querySelector('.slider-nav.prev');
-    const dotsContainer = document.querySelector('.slider-dots');
-    let currentSlide = 0;
-    let slideInterval;
+                // New Slider Script
+                const slides = document.querySelectorAll('.slide');
+                const nextBtn = document.querySelector('.slider-nav.next');
+                const prevBtn = document.querySelector('.slider-nav.prev');
+                const dotsContainer = document.querySelector('.slider-dots');
+                let currentSlide = 0;
+                let slideInterval;
 
-    function showSlide(n) {
-        slides.forEach(slide => slide.classList.remove('active'));
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach(dot => dot.classList.remove('active'));
+                function showSlide(n) {
+                    slides.forEach(slide => slide.classList.remove('active'));
+                    const dots = document.querySelectorAll('.dot');
+                    dots.forEach(dot => dot.classList.remove('active'));
 
-        currentSlide = (n + slides.length) % slides.length;
+                    currentSlide = (n + slides.length) % slides.length;
 
-        slides[currentSlide].classList.add('active');
-        dots[currentSlide].classList.add('active');
-    }
+                    slides[currentSlide].classList.add('active');
+                    dots[currentSlide].classList.add('active');
+                }
 
-    function nextSlide() {
-        showSlide(currentSlide + 1);
-    }
+                function nextSlide() {
+                    showSlide(currentSlide + 1);
+                }
 
-    function prevSlide() {
-        showSlide(currentSlide - 1);
-    }
+                function prevSlide() {
+                    showSlide(currentSlide - 1);
+                }
 
-    function startSlideShow() {
-        slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
-    }
+                function startSlideShow() {
+                    slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+                }
 
-    function stopSlideShow() {
-        clearInterval(slideInterval);
-    }
+                function stopSlideShow() {
+                    clearInterval(slideInterval);
+                }
 
-    // Create dots
-    slides.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.classList.add('dot');
-        dot.addEventListener('click', () => {
-            stopSlideShow();
-            showSlide(i);
-            startSlideShow();
-        });
-        dotsContainer.appendChild(dot);
-    });
+                // Create dots
+                slides.forEach((_, i) => {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot');
+                    dot.addEventListener('click', () => {
+                        stopSlideShow();
+                        showSlide(i);
+                        startSlideShow();
+                    });
+                    dotsContainer.appendChild(dot);
+                });
 
-    nextBtn.addEventListener('click', () => { stopSlideShow(); nextSlide(); startSlideShow(); });
-    prevBtn.addEventListener('click', () => { stopSlideShow(); prevSlide(); startSlideShow(); });
+                nextBtn.addEventListener('click', () => {
+                    stopSlideShow();
+                    nextSlide();
+                    startSlideShow();
+                });
+                prevBtn.addEventListener('click', () => {
+                    stopSlideShow();
+                    prevSlide();
+                    startSlideShow();
+                });
 
-    // Initialize
-    showSlide(0);
-    startSlideShow();
+                // Initialize
+                showSlide(0);
+                startSlideShow();
 
-    document.querySelectorAll('.product-card').forEach(function(card) {
-        const qtyInput = card.querySelector('.qty-input');
-        const priceNairaDisplay = card.querySelector('.product-price');
-        const priceDollarDisplay = card.querySelector('.product-price-dollar');
+                document.querySelectorAll('.product-card').forEach(function(card) {
+                    const qtyInput = card.querySelector('.qty-input');
+                    const priceNairaDisplay = card.querySelector('.product-price');
+                    const priceDollarDisplay = card.querySelector('.product-price-dollar');
 
-        // Get base unit prices from data attributes
-        const unitPriceNaira = parseFloat(priceNairaDisplay.dataset.unitPrice);
-        const unitPriceDollar = parseFloat(priceDollarDisplay.dataset.unitPrice);
+                    // Get base unit prices from data attributes
+                    const unitPriceNaira = parseFloat(priceNairaDisplay.dataset.unitPrice);
+                    const unitPriceDollar = parseFloat(priceDollarDisplay.dataset.unitPrice);
 
-        // Function to format numbers as currency
-        const formatCurrency = (amount) => {
-            return amount.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                    // Function to format numbers as currency
+                    const formatCurrency = (amount) => {
+                        return amount.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    };
+
+                    // Add event listener to the quantity input
+                    qtyInput.addEventListener('input', function() {
+                        let quantity = parseInt(this.value);
+
+                        // Ensure quantity is a valid number, default to 1 if not
+                        if (isNaN(quantity) || quantity < 1) {
+                            quantity = 1;
+                        }
+
+                        // Calculate new total prices
+                        const totalNaira = unitPriceNaira * quantity;
+                        const totalDollar = unitPriceDollar * quantity;
+
+                        // Update the displayed prices
+                        priceNairaDisplay.innerHTML = `₦${formatCurrency(totalNaira)}`;
+                        priceDollarDisplay.innerHTML = `$${formatCurrency(totalDollar)}`;
+                    });
+                });
             });
-        };
-
-        // Add event listener to the quantity input
-        qtyInput.addEventListener('input', function() {
-            let quantity = parseInt(this.value);
-
-            // Ensure quantity is a valid number, default to 1 if not
-            if (isNaN(quantity) || quantity < 1) {
-                quantity = 1;
-            }
-
-            // Calculate new total prices
-            const totalNaira = unitPriceNaira * quantity;
-            const totalDollar = unitPriceDollar * quantity;
-
-            // Update the displayed prices
-            priceNairaDisplay.innerHTML = `₦${formatCurrency(totalNaira)}`;
-            priceDollarDisplay.innerHTML = `$${formatCurrency(totalDollar)}`;
-        });
-    });
-});
-</script>
+        </script>
 </body>
+
 </html>
